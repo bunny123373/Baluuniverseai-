@@ -1,0 +1,8 @@
+PORT=10000
+MONGO_URI=your_mongo_url_here
+ADMIN_TOKEN=your_admin_token_here
+
+AWS_REGION=ap-south-1  # లేదా నీ bucket region
+AWS_ACCESS_KEY_ID=AKIAxxxxxxxx
+AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxx
+S3_BUCKET=baluplix-videos
