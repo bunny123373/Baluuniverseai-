@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BaluPlix Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="header-brand">🔐 BALUPLIX ADMIN</div>
+    <div class="header-sub">Upload • Publish • Delete</div>
+  </header>
+
+  <div class="container">
+
+    <div class="admin-panel">
+
+      <input type="text" id="title" placeholder="Video Title">
+
+      <textarea id="desc" placeholder="Description (optional)" rows="3"></textarea>
+
+      <input type="file" id="videoFile" accept="video/*">
+
+      <button class="btn" id="uploadBtn">Upload Video</button>
+    </div>
+
+    <h3 style="margin-top:25px; margin-bottom:10px;">All Videos</h3>
+
+    <div id="allVideos" class="admin-videos"></div>
+
+  </div>
+
+  <script>
+    window.__API_BASE__ = "https://your-render-backend.onrender.com";
+    window.__ADMIN_TOKEN = "your-admin-token-here";  // same as .env ADMIN_TOKEN
+  </script>
+
+  <script src="script.js"></script>
+
+</body>
+</html>
