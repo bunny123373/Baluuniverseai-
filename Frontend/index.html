@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BaluPlix – Watch Videos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="header-brand">🔥 BALUPLIX</div>
+    <div class="header-sub">Mobile / Tablet Streaming</div>
+  </header>
+
+  <div class="container">
+    <div id="grid" class="grid"></div>
+  </div>
+
+  <!-- Player overlay auto-created by script.js -->
+
+  <script>
+    // You can hardcode backend URL so prompt won't appear
+    window.__API_BASE__ = "https://your-render-backend.onrender.com";
+  </script>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<video id="hlsPlayer" controls></video>
+<script>
+  const video = document.getElementById('hlsPlayer');
+  const url = 'https://.../master.m3u8';
+  if (Hls.isSupported()) {
+    const hls = new Hls();
+    hls.loadSource(url);
+    hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+      video.play();
+    });
+  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    video.src = url;
+    video.addEventListener('loadedmetadata', ()=>video.play());
+  }
+</script>
+
+</body>
+</html>
