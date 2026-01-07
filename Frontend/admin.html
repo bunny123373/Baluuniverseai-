@@ -1,43 +1,144 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>BaluPlix Admin</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>Admin Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{margin:0;font-family:Arial;background:#0b0b0b;color:#fff;display:flex}
+.sidebar{width:220px;background:#111;padding:20px}
+.sidebar button{width:100%;padding:12px;margin-bottom:8px;background:#1a1a1a;color:#fff;border:none;cursor:pointer}
+.sidebar button.active{background:#7CFC00;color:#000}
+.main{flex:1;padding:20px;overflow:auto}
+.form{background:#111;padding:15px;border-radius:8px;max-width:500px}
+input,select,textarea,button{width:100%;padding:8px;margin:5px 0;background:#1a1a1a;border:none;color:#fff}
+button{background:#7CFC00;color:#000;font-weight:bold}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,200px);gap:15px;margin-top:20px}
+.card{background:#111;padding:8px;border-radius:6px}
+.card img{width:100%;height:260px;object-fit:cover}
+.series{background:#111;padding:10px;border-radius:6px;margin-bottom:10px}
+</style>
 </head>
 <body>
 
-  <header class="app-header">
-    <div class="header-brand">🔐 BALUPLIX ADMIN</div>
-    <div class="header-sub">Upload • Publish • Delete</div>
-  </header>
+<div class="sidebar">
+  <button class="active" onclick="tab('movies')">Movies</button>
+  <button onclick="tab('series')">Series</button>
+</div>
 
-  <div class="container">
+<div class="main">
 
-    <div class="admin-panel">
-
-      <input type="text" id="title" placeholder="Video Title">
-
-      <textarea id="desc" placeholder="Description (optional)" rows="3"></textarea>
-
-      <input type="file" id="videoFile" accept="video/*">
-
-      <button class="btn" id="uploadBtn">Upload Video</button>
-    </div>
-
-    <h3 style="margin-top:25px; margin-bottom:10px;">All Videos</h3>
-
-    <div id="allVideos" class="admin-videos"></div>
-
+<!-- MOVIES -->
+<div id="movies">
+  <div class="form">
+    <h3>Upload Movie</h3>
+    <input id="mtitle" placeholder="Title">
+    <input id="mcat" placeholder="Category">
+    <textarea id="mdesc" placeholder="Description"></textarea>
+    <input type="file" id="mposter">
+    <input type="file" id="mvideo">
+    <button onclick="uploadMovie()">Upload</button>
   </div>
+  <div class="grid" id="movieGrid"></div>
+</div>
 
-  <script>
-    window.__API_BASE__ = "https://your-render-backend.onrender.com";
-    window.__ADMIN_TOKEN = "your-admin-token-here";  // same as .env ADMIN_TOKEN
-  </script>
+<!-- SERIES -->
+<div id="series" style="display:none">
+  <div class="form">
+    <h3>Create Series</h3>
+    <input id="stitle" placeholder="Series title">
+    <textarea id="sdesc" placeholder="Description"></textarea>
+    <button onclick="createSeries()">Create</button>
+  </div>
+  <div id="seriesList"></div>
+</div>
 
-  <script src="script.js"></script>
+</div>
 
+<script>
+const API="http://localhost:5000";
+
+function tab(t){
+  movies.style.display=t==="movies"?"block":"none";
+  series.style.display=t==="series"?"block":"none";
+}
+
+/* MOVIES */
+function uploadMovie(){
+  const f=new FormData();
+  f.append("title",mtitle.value);
+  f.append("category",mcat.value);
+  f.append("description",mdesc.value);
+  f.append("poster",mposter.files[0]);
+  f.append("video",mvideo.files[0]);
+  fetch(API+"/upload",{method:"POST",body:f}).then(loadMovies);
+}
+function loadMovies(){
+  fetch(API+"/movies").then(r=>r.json()).then(list=>{
+    movieGrid.innerHTML="";
+    list.forEach(m=>{
+      const d=document.createElement("div");
+      d.className="card";
+      d.innerHTML=`
+        <img src="${API}/${m.poster}">
+        <b>${m.title}</b>
+        <button onclick="delMovie('${m._id}')">Delete</button>
+      `;
+      movieGrid.appendChild(d);
+    });
+  });
+}
+function delMovie(id){
+  fetch(API+"/movies/"+id,{method:"DELETE"}).then(loadMovies);
+}
+
+/* SERIES */
+function createSeries(){
+  fetch(API+"/series",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({title:stitle.value,description:sdesc.value})
+  }).then(loadSeries);
+}
+function loadSeries(){
+  fetch(API+"/series").then(r=>r.json()).then(list=>{
+    seriesList.innerHTML="";
+    list.forEach(s=>{
+      const d=document.createElement("div");
+      d.className="series";
+      d.innerHTML=`
+        <b>${s.title}</b>
+        <p>${s.description||""}</p>
+        <input type="file" onchange="uploadEp('${s._id}',this)">
+        <div id="eps-${s._id}"></div>
+      `;
+      seriesList.appendChild(d);
+      renderEps(s._id,s.episodes);
+    });
+  });
+}
+function uploadEp(id,input){
+  const f=new FormData();
+  f.append("video",input.files[0]);
+  fetch(API+"/series/"+id+"/episode",{method:"POST",body:f}).then(loadSeries);
+}
+function renderEps(id,eps){
+  const box=document.getElementById("eps-"+id);
+  box.innerHTML="";
+  eps.forEach((e,i)=>{
+    box.innerHTML+=`
+      <div>
+        Episode ${i+1}
+        <button onclick="delEp('${id}',${i})">Delete</button>
+      </div>`;
+  });
+}
+function delEp(id,i){
+  fetch(API+"/series/"+id+"/episode/"+i,{method:"DELETE"}).then(loadSeries);
+}
+
+loadMovies();
+loadSeries();
+</script>
 </body>
 </html>
